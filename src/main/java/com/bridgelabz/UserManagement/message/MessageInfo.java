@@ -18,4 +18,6 @@ public class MessageInfo {
 	public String User_Exist = "Please try with other Email-id";
 	
 	public String User_Added = "User is Added Successfully";
+	
+	public String User_Already_Exist = "Username or Email is Already Exist in our Records ";
 }

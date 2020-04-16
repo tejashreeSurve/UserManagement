@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Entity
 @Table(name = "userInformation")
-public class UsersEntity {
+public class UserEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private int id;

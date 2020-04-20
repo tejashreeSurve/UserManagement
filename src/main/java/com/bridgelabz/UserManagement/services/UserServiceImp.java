@@ -1,21 +1,47 @@
 package com.bridgelabz.UserManagement.services;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.bridgelabz.UserManagement.Utility.JwtToken;
+import com.bridgelabz.UserManagement.Utility.MailSenderService;
+import com.bridgelabz.UserManagement.dto.LoginDto;
 import com.bridgelabz.UserManagement.dto.UserDto;
+import com.bridgelabz.UserManagement.exception.FileIsEmpty;
+import com.bridgelabz.UserManagement.exception.IncorrectPassword;
+import com.bridgelabz.UserManagement.exception.InvlideLogin;
+import com.bridgelabz.UserManagement.exception.ProfilePicNotUploaded;
 import com.bridgelabz.UserManagement.exception.UserAlreadyExsist;
+import com.bridgelabz.UserManagement.exception.UserNotExist;
+import com.bridgelabz.UserManagement.message.MessageBody;
 import com.bridgelabz.UserManagement.message.MessageInfo;
 import com.bridgelabz.UserManagement.model.UserEntity;
 import com.bridgelabz.UserManagement.repository.UserRepository;
 import com.bridgelabz.UserManagement.response.Response;
-import com.sun.istack.logging.Logger;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 
+@Component
 @Service
+@PropertySource("message.properties")
 public class UserServiceImp implements IUserServices {
 
+	@Autowired
 	Environment environment;
 
 	@Autowired
@@ -27,7 +53,50 @@ public class UserServiceImp implements IUserServices {
 	@Autowired
 	private MessageInfo message;
 
-	private static final Logger LOGGER = Logger.getLogger(UserServiceImp.class);
+	@Autowired
+	private JwtToken jwtToken;
+
+	@Autowired
+	private MessageBody messageBody;
+
+	SimpleMailMessage simpleMailMessage;
+
+	@Autowired
+	MailSenderService mailSenderService;
+
+	@Override
+	public Response login(LoginDto loginDto) {
+		UserEntity user = userRepository.findByUserName(loginDto.getUserName());
+		String token = jwtToken.generateToken(loginDto.getUserName());
+		System.out.println("USERNAME :--     " + token);
+		if (user == null)
+			throw new InvlideLogin(message.Login_Exception);
+		user.setToken(token);
+		if (user.isValidate()) {
+			if ((user.getUserPassword()).equals(loginDto.getUserPassword())) {
+				user.setLatestLoggedIn(new Date());
+				user.setUserStatus("Active");
+				userRepository.save(user);
+				return new Response(Integer.parseInt(environment.getProperty("success.code")),
+						environment.getProperty("login.Success"), token);
+			}
+			throw new IncorrectPassword(message.Incorrect_Password);
+		}
+		return new Response(Integer.parseInt(environment.getProperty("bad.code")),
+				environment.getProperty("email.not.verified"), token);
+	}
+
+	@Override
+	public Response logout(String token) {
+		String userName = jwtToken.getToken(token);
+		UserEntity user = userRepository.findByUserName(userName);
+		if (user == null)
+			throw new UserNotExist(message.User_Not_Exist);
+		user.setLogoutStatus(true);
+		userRepository.save(user);
+		return new Response(Integer.parseInt(environment.getProperty("bad.code")), environment.getProperty("login.out"),
+				message.Login_Out);
+	}
 
 	@Override
 	public Response newUser(UserDto userDto) {
@@ -35,13 +104,78 @@ public class UserServiceImp implements IUserServices {
 		UserEntity userEmail = userRepository.findByEmail(userDto.getEmail());
 		if (userName != null || userEmail != null)
 			throw new UserAlreadyExsist(message.User_Already_Exist);
-		if (userDto.getUserPassword() != userDto.getConfirmPassword())
-			return new Response(Integer.parseInt(environment.getProperty("success.code")),
-					environment.getProperty("user.added"), message.User_Added);
+		if (!(userDto.getConfirmPassword()).equals(userDto.getUserPassword()))
+			throw new IncorrectPassword(message.Incorrect_Confirm_Password);
 		UserEntity userEntity = mapper.map(userDto, UserEntity.class);
+		String token = jwtToken.generateToken(userDto.getUserName());
+		System.out.println("USER TOKEN:-      " + token);
+		userEntity.setToken(token);
+		simpleMailMessage = messageBody.verifyMail(userDto.getEmail(), userDto.getFirstName(), token);
+		mailSenderService.sendEmail(simpleMailMessage);
 		userRepository.save(userEntity);
 		return new Response(Integer.parseInt(environment.getProperty("success.code")),
-				environment.getProperty("user.added"), message.User_Added);
+				environment.getProperty("user.added"), token);
+	}
 
+	@Override
+	public Response validateUser(String token) {
+		String userName = jwtToken.getToken(token);
+		UserEntity user = userRepository.findByUserName(userName);
+		System.out.println("USERNAME :    " +userName);
+		if (user == null)
+			throw new UserNotExist(message.User_Not_Exist);
+		user.setValidate(true);
+		userRepository.save(user);
+		return new Response(Integer.parseInt(environment.getProperty("success.code")),
+				environment.getProperty("verified.email"), message.Verified_User);
+	}
+
+	@Override
+	public Response getUserList() {
+		List<UserEntity> userList = userRepository.findAll();
+		if (userList == null)
+			throw new UserNotExist(message.Users_List_Not_Exist);
+		return new Response(Integer.parseInt(environment.getProperty("success.code")),
+				environment.getProperty("user.list"), userList);
+	}
+
+	@Override
+	public Response addProfilePic(String token, MultipartFile profileImage) {
+		String userName = jwtToken.getToken(token);
+		UserEntity user = userRepository.findByUserName(userName);
+		// check whether user is present or not
+		if (user == null)
+			throw new UserNotExist(message.User_Not_Exist);
+		// file is not selected to upload
+		if (profileImage.isEmpty())
+			throw new FileIsEmpty(message.File_Is_Empty);
+		File uploadFile = new File(profileImage.getOriginalFilename());
+		try {
+			BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(uploadFile));
+			try {
+				outputStream.write(profileImage.getBytes());
+				outputStream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		// set all cloudinary properties
+		Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap("cloud_name", "duquns9m9", "api_key",
+				"691264649257271", "api_secret", "mRFRpme5AAqej5Ktef3GYVSzWtI"));
+		Map<?, ?> uploadProfile;
+
+		try {
+			// this upload the image on cloudinary
+			uploadProfile = cloudinary.uploader().upload(uploadFile, ObjectUtils.emptyMap());
+		} catch (IOException e) {
+			throw new ProfilePicNotUploaded(message.Profile_Not_Uploaded);
+		}
+		// set the profile-pic url in userDetail table
+		user.setProfilePic(uploadProfile.get("secure_url").toString());
+		userRepository.save(user);
+		return new Response(Integer.parseInt(environment.getProperty("success.code")),
+				environment.getProperty("upload.profilepic"), message.Profile_Uploaded);
 	}
 }

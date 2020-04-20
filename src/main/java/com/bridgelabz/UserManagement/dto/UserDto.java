@@ -3,10 +3,15 @@ package com.bridgelabz.UserManagement.dto;
 import java.time.LocalDate;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+/**
+ * @author Tejashree Surve
+ * @Purpose : This is Data Transfer Object that holds Data for User dto.
+ */
 public class UserDto {
 	@NotEmpty
 	private String firstName;
@@ -14,7 +19,7 @@ public class UserDto {
 	private String middleName;
 	@NotEmpty
 	private String lastName;
-	@NotEmpty
+	@NotNull
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private LocalDate birthDate;
 	@NotEmpty

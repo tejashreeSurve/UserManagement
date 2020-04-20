@@ -5,6 +5,12 @@ import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+
+/**
+ * @author Tejashree Surve
+ * @Purpose : Contains Beans Definition so that spring IOC container can create
+ *          object for ModelMapper.
+ */
 @Configuration
 public class BasicConfiguration {
 

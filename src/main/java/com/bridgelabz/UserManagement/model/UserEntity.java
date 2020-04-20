@@ -1,6 +1,7 @@
 package com.bridgelabz.UserManagement.model;
 
 import java.time.LocalDate;
+import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Entity
-@Table(name = "userInformation")
+@Table(name = "userDetails")
 public class UserEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -28,10 +29,14 @@ public class UserEntity {
 	private String email;
 	private String userName;
 	private String userPassword;
-	private String confirmPassword;
 	private String userRole;
+	private String confirmPassword;
 	private boolean isValidate = false;
 	private String profilePic;
+	private String token;
+	private Date latestLoggedIn;
+	private boolean logoutStatus = false;
+	private String userStatus = "Inactive";
 
 	public int getId() {
 		return id;
@@ -137,6 +142,14 @@ public class UserEntity {
 		this.confirmPassword = confirmPassword;
 	}
 
+	public String getProfilePic() {
+		return profilePic;
+	}
+
+	public void setProfilePic(String profilePic) {
+		this.profilePic = profilePic;
+	}
+
 	public String getUserRole() {
 		return userRole;
 	}
@@ -145,19 +158,43 @@ public class UserEntity {
 		this.userRole = userRole;
 	}
 
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+	public Date getLatestLoggedIn() {
+		return latestLoggedIn;
+	}
+
+	public void setLatestLoggedIn(Date latestLoggedIn) {
+		this.latestLoggedIn = latestLoggedIn;
+	}
+
+	public boolean isLogoutStatus() {
+		return logoutStatus;
+	}
+
+	public void setLogoutStatus(boolean logoutStatus) {
+		this.logoutStatus = logoutStatus;
+	}
+
+	public String getUserStatus() {
+		return userStatus;
+	}
+
+	public void setUserStatus(String userStatus) {
+		this.userStatus = userStatus;
+	}
+
 	public boolean isValidate() {
 		return isValidate;
 	}
 
 	public void setValidate(boolean isValidate) {
 		this.isValidate = isValidate;
-	}
-
-	public String getProfilePic() {
-		return profilePic;
-	}
-
-	public void setProfilePic(String profilePic) {
-		this.profilePic = profilePic;
 	}
 }

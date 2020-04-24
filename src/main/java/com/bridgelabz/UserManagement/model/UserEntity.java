@@ -1,12 +1,12 @@
 package com.bridgelabz.UserManagement.model;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.springframework.stereotype.Component;
@@ -33,10 +33,12 @@ public class UserEntity {
 	private String confirmPassword;
 	private boolean isValidate = false;
 	private String profilePic;
+	private String latestLoginTime;
 	private String token;
-	private Date latestLoggedIn;
 	private boolean logoutStatus = false;
 	private String userStatus = "Inactive";
+	@OneToOne(mappedBy = "userEntity")
+	private PermissionsEntity permissionsEntity = new PermissionsEntity();
 
 	public int getId() {
 		return id;
@@ -166,14 +168,6 @@ public class UserEntity {
 		this.token = token;
 	}
 
-	public Date getLatestLoggedIn() {
-		return latestLoggedIn;
-	}
-
-	public void setLatestLoggedIn(Date latestLoggedIn) {
-		this.latestLoggedIn = latestLoggedIn;
-	}
-
 	public boolean isLogoutStatus() {
 		return logoutStatus;
 	}
@@ -196,5 +190,21 @@ public class UserEntity {
 
 	public void setValidate(boolean isValidate) {
 		this.isValidate = isValidate;
+	}
+
+	public String getLatestLoginTime() {
+		return latestLoginTime;
+	}
+
+	public void setLatestLoginTime(String latestLoginTime) {
+		this.latestLoginTime = latestLoginTime;
+	}
+
+	public PermissionsEntity getPermissionsEntity() {
+		return permissionsEntity;
+	}
+
+	public void setPermissionsEntity(PermissionsEntity permissionsEntity) {
+		this.permissionsEntity = permissionsEntity;
 	}
 }

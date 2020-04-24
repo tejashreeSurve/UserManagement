@@ -21,8 +21,8 @@ public class JwtToken {
 
 	static String secretKey = "iamsecretkey";
 
-	public String generateToken(String userName) {
-		return Jwts.builder().setId(userName).setIssuedAt(new Date(System.currentTimeMillis()))
+	public String generateToken(String userEmail) {
+		return Jwts.builder().setId(userEmail).setIssuedAt(new Date(System.currentTimeMillis()))
 				.signWith(algorithm, secretKey).compact();
 	}
 

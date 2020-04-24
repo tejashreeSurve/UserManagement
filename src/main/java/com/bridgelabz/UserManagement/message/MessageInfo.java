@@ -34,6 +34,12 @@ public class MessageInfo {
 	public String User_Role_Added = "New User Role is Successfully Added";
 
 	public String Invalide_Token = "Invalide Token,Access Denied";
+	
+	public String Token_For_ForgetPassword = "You can Reset your Password Successfully";
+	
+	public String Update_Password = "User Password is Updated Successfully";
+	
+	public String Email_Not_Verified = "Email is Not Verify";
 
 	public String File_Is_Empty = "Profile Pic is not Selected";
 
@@ -48,4 +54,8 @@ public class MessageInfo {
 	public String Login_Exception = "Invalide Username or Password";
 
 	public String Login_Out = "Successfully Logged-out";
+	
+	public String Permission = "Permission is provided Successfully";
+	
+	public String Permission_Already_Provided = "Permission for this User is Already Provided";
 }

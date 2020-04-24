@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -20,17 +22,22 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.bridgelabz.UserManagement.Utility.JwtToken;
 import com.bridgelabz.UserManagement.Utility.MailSenderService;
+import com.bridgelabz.UserManagement.dto.ForgetPasswordDto;
 import com.bridgelabz.UserManagement.dto.LoginDto;
+import com.bridgelabz.UserManagement.dto.ResetPasswordDto;
 import com.bridgelabz.UserManagement.dto.UserDto;
 import com.bridgelabz.UserManagement.exception.FileIsEmpty;
 import com.bridgelabz.UserManagement.exception.IncorrectPassword;
 import com.bridgelabz.UserManagement.exception.InvlideLogin;
+import com.bridgelabz.UserManagement.exception.PermissionAlreadyProvided;
 import com.bridgelabz.UserManagement.exception.ProfilePicNotUploaded;
 import com.bridgelabz.UserManagement.exception.UserAlreadyExsist;
 import com.bridgelabz.UserManagement.exception.UserNotExist;
 import com.bridgelabz.UserManagement.message.MessageBody;
 import com.bridgelabz.UserManagement.message.MessageInfo;
+import com.bridgelabz.UserManagement.model.PermissionsEntity;
 import com.bridgelabz.UserManagement.model.UserEntity;
+import com.bridgelabz.UserManagement.repository.PermissionsRepository;
 import com.bridgelabz.UserManagement.repository.UserRepository;
 import com.bridgelabz.UserManagement.response.Response;
 import com.cloudinary.Cloudinary;
@@ -46,6 +53,9 @@ public class UserServiceImp implements IUserServices {
 
 	@Autowired
 	private UserRepository userRepository;
+
+	@Autowired
+	private PermissionsRepository permissionRepository;
 
 	@Autowired
 	private ModelMapper mapper;
@@ -67,14 +77,16 @@ public class UserServiceImp implements IUserServices {
 	@Override
 	public Response login(LoginDto loginDto) {
 		UserEntity user = userRepository.findByUserName(loginDto.getUserName());
-		String token = jwtToken.generateToken(loginDto.getUserName());
-		System.out.println("USERNAME :--     " + token);
 		if (user == null)
 			throw new InvlideLogin(message.Login_Exception);
+		String token = jwtToken.generateToken(user.getUserName());
+		System.out.println("USEREMAIL :--     " + token);
 		user.setToken(token);
 		if (user.isValidate()) {
 			if ((user.getUserPassword()).equals(loginDto.getUserPassword())) {
-				user.setLatestLoggedIn(new Date());
+				DateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy hh:mm aa");
+				String dateString = dateFormat.format(new Date()).toString();
+				user.setLatestLoginTime(dateString);
 				user.setUserStatus("Active");
 				userRepository.save(user);
 				return new Response(Integer.parseInt(environment.getProperty("success.code")),
@@ -94,8 +106,41 @@ public class UserServiceImp implements IUserServices {
 			throw new UserNotExist(message.User_Not_Exist);
 		user.setLogoutStatus(true);
 		userRepository.save(user);
-		return new Response(Integer.parseInt(environment.getProperty("bad.code")), environment.getProperty("login.out"),
-				message.Login_Out);
+		return new Response(Integer.parseInt(environment.getProperty("success.code")),
+				environment.getProperty("login.out"), message.Login_Out);
+	}
+
+	@Override
+	public Response forgetPassword(ForgetPasswordDto forgetPasswordDto) {
+		UserEntity user = userRepository.findByEmail(forgetPasswordDto.getEmail());
+		if (user == null)
+			throw new UserNotExist(message.User_Not_Exist);
+		if (user.isValidate()) {
+			String token = jwtToken.generateToken(user.getUserName());
+			System.out.println("FROGETPASSWORD TOKEN :----          " + token);
+			simpleMailMessage = messageBody.passwordReset(user.getEmail(), user.getFirstName(), token);
+			mailSenderService.sendEmail(simpleMailMessage);
+			return new Response(Integer.parseInt(environment.getProperty("success.code")),
+					environment.getProperty("token.send"), message.Token_For_ForgetPassword);
+		}
+		return new Response(Integer.parseInt(environment.getProperty("bad.code")),
+				environment.getProperty("email.not.verified"), message.Email_Not_Verified);
+	}
+
+	@Override
+	public Response resetPassword(String token, ResetPasswordDto resetPasswordDto) {
+		String userName = jwtToken.getToken(token);
+		UserEntity user = userRepository.findByUserName(userName);
+		if (user == null)
+			throw new UserNotExist(message.User_Not_Exist);
+		if (resetPasswordDto.getUserPassword().equals(resetPasswordDto.getConfirmPassword())) {
+			user.setUserPassword(resetPasswordDto.getUserPassword());
+			user.setConfirmPassword(resetPasswordDto.getConfirmPassword());
+			userRepository.save(user);
+			return new Response(Integer.parseInt(environment.getProperty("success.code")),
+					environment.getProperty("reset.password"), message.Update_Password);
+		}
+		throw new IncorrectPassword(message.Incorrect_Password);
 	}
 
 	@Override
@@ -118,10 +163,52 @@ public class UserServiceImp implements IUserServices {
 	}
 
 	@Override
+	public Response addPermissions(String token) {
+		String user = jwtToken.getToken(token);
+		UserEntity userEntity = userRepository.findByUserName(user);
+		if (userEntity == null)
+			throw new UserNotExist(message.User_Not_Exist);
+		PermissionsEntity userPermission = new PermissionsEntity();
+		System.out.println("user Role :--- " + userEntity.getUserRole());
+		if(userEntity.getPermissionsEntity() != null)
+			throw new PermissionAlreadyProvided(message.Permission_Already_Provided);
+		if (userEntity.getUserRole().equals("admin")) {
+			userPermission.setAddInDashboard(true);
+			userPermission.setDeleteInDashboard(true);
+			userPermission.setModifyInDashboard(true);
+			userPermission.setReadInDashboard(true);
+			userPermission.setAddInUserInfo(true);
+			userPermission.setDeleteInUserInfo(true);
+			userPermission.setModifyInUserInfo(true);
+			userPermission.setReadInUserInfo(true);
+			userPermission.setUserEntity(userEntity);
+			permissionRepository.save(userPermission);
+			return new Response(Integer.parseInt(environment.getProperty("success.code")),
+					environment.getProperty("permission"), message.Permission);
+		} else {
+			userPermission.setAddInUserInfo(true);
+			userPermission.setModifyInUserInfo(true);
+			userPermission.setUserEntity(userEntity);
+			permissionRepository.save(userPermission);
+			return new Response(Integer.parseInt(environment.getProperty("success.code")),
+					environment.getProperty("permission"), message.Permission);
+		}
+	}
+
+	@Override
+	public Response getUserProfileDetail(String token) {
+		String userName = jwtToken.getToken(token);
+		UserEntity user = userRepository.findByUserName(userName);
+		if (user == null)
+			throw new UserNotExist(message.User_Not_Exist);
+		return new Response(Integer.parseInt(environment.getProperty("success.code")),
+				environment.getProperty("profile.displayed"), userRepository.userDetails(userName));
+	}
+
+	@Override
 	public Response validateUser(String token) {
 		String userName = jwtToken.getToken(token);
 		UserEntity user = userRepository.findByUserName(userName);
-		System.out.println("USERNAME :    " +userName);
 		if (user == null)
 			throw new UserNotExist(message.User_Not_Exist);
 		user.setValidate(true);

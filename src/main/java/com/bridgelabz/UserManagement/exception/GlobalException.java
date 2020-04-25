@@ -67,9 +67,23 @@ public class GlobalException {
 				new Response(Integer.parseInt(message.Bad_Request), e.getMessage(), "Please try again!!!"),
 				HttpStatus.BAD_REQUEST);
 	}
-	
+
 	@ExceptionHandler(PermissionAlreadyProvided.class)
 	public ResponseEntity<Response> PermissionAlreadyProvided(Exception e) {
+		return new ResponseEntity<Response>(
+				new Response(Integer.parseInt(message.Bad_Request), e.getMessage(), "Please try again!!!"),
+				HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(PermissionDeniedError.class)
+	public ResponseEntity<Response> PermissionDeniedError(Exception e) {
+		return new ResponseEntity<Response>(
+				new Response(Integer.parseInt(message.Bad_Request), e.getMessage(), "Please try again!!!"),
+				HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(InvalideUser.class)
+	public ResponseEntity<Response> InvalideUser(Exception e) {
 		return new ResponseEntity<Response>(
 				new Response(Integer.parseInt(message.Bad_Request), e.getMessage(), "Please try again!!!"),
 				HttpStatus.BAD_REQUEST);

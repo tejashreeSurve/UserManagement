@@ -58,4 +58,8 @@ public class MessageInfo {
 	public String Permission = "Permission is provided Successfully";
 	
 	public String Permission_Already_Provided = "Permission for this User is Already Provided";
+	
+	public String Updated_Profile = "User Profile Details is Updated Successfully";
+	
+	public String Permission_Denied = "Permission Denied for User to perform this Action";
 }

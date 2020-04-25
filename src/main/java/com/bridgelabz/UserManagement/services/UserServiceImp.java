@@ -22,14 +22,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.bridgelabz.UserManagement.Utility.JwtToken;
 import com.bridgelabz.UserManagement.Utility.MailSenderService;
+import com.bridgelabz.UserManagement.dto.EditUserDto;
 import com.bridgelabz.UserManagement.dto.ForgetPasswordDto;
 import com.bridgelabz.UserManagement.dto.LoginDto;
 import com.bridgelabz.UserManagement.dto.ResetPasswordDto;
 import com.bridgelabz.UserManagement.dto.UserDto;
 import com.bridgelabz.UserManagement.exception.FileIsEmpty;
 import com.bridgelabz.UserManagement.exception.IncorrectPassword;
+import com.bridgelabz.UserManagement.exception.InvalideUser;
 import com.bridgelabz.UserManagement.exception.InvlideLogin;
 import com.bridgelabz.UserManagement.exception.PermissionAlreadyProvided;
+import com.bridgelabz.UserManagement.exception.PermissionDeniedError;
 import com.bridgelabz.UserManagement.exception.ProfilePicNotUploaded;
 import com.bridgelabz.UserManagement.exception.UserAlreadyExsist;
 import com.bridgelabz.UserManagement.exception.UserNotExist;
@@ -94,8 +97,7 @@ public class UserServiceImp implements IUserServices {
 			}
 			throw new IncorrectPassword(message.Incorrect_Password);
 		}
-		return new Response(Integer.parseInt(environment.getProperty("bad.code")),
-				environment.getProperty("email.not.verified"), token);
+		throw new InvalideUser(message.Email_Not_Verified);
 	}
 
 	@Override
@@ -123,8 +125,7 @@ public class UserServiceImp implements IUserServices {
 			return new Response(Integer.parseInt(environment.getProperty("success.code")),
 					environment.getProperty("token.send"), message.Token_For_ForgetPassword);
 		}
-		return new Response(Integer.parseInt(environment.getProperty("bad.code")),
-				environment.getProperty("email.not.verified"), message.Email_Not_Verified);
+		throw new InvalideUser(message.Email_Not_Verified);
 	}
 
 	@Override
@@ -169,8 +170,7 @@ public class UserServiceImp implements IUserServices {
 		if (userEntity == null)
 			throw new UserNotExist(message.User_Not_Exist);
 		PermissionsEntity userPermission = new PermissionsEntity();
-		System.out.println("user Role :--- " + userEntity.getUserRole());
-		if(userEntity.getPermissionsEntity() != null)
+		if (userEntity.getPermissionsEntity() != null)
 			throw new PermissionAlreadyProvided(message.Permission_Already_Provided);
 		if (userEntity.getUserRole().equals("admin")) {
 			userPermission.setAddInDashboard(true);
@@ -206,6 +206,24 @@ public class UserServiceImp implements IUserServices {
 	}
 
 	@Override
+	public Response editUserProfile(String token, EditUserDto editUserDto) {
+		String userName = jwtToken.getToken(token);
+		UserEntity user = userRepository.findByUserName(userName);
+		if (user == null)
+			throw new UserNotExist(message.User_Not_Exist);
+		user.setFirstName(editUserDto.getFirstName());
+		user.setMiddleName(editUserDto.getMiddleName());
+		user.setLastName(editUserDto.getLastName());
+		user.setAddress(editUserDto.getAddress());
+		user.setBirthDate(editUserDto.getBirthDate());
+		user.setCountry(editUserDto.getCountry());
+		user.setPhoneNumber(editUserDto.getPhoneNumber());
+		userRepository.save(user);
+		return new Response(Integer.parseInt(environment.getProperty("success.code")),
+				environment.getProperty("update.profileDetail"), message.Updated_Profile);
+	}
+
+	@Override
 	public Response validateUser(String token) {
 		String userName = jwtToken.getToken(token);
 		UserEntity user = userRepository.findByUserName(userName);
@@ -219,7 +237,7 @@ public class UserServiceImp implements IUserServices {
 
 	@Override
 	public Response getUserList() {
-		List<UserEntity> userList = userRepository.findAll();
+		List<Object[]> userList = userRepository.userList();
 		if (userList == null)
 			throw new UserNotExist(message.Users_List_Not_Exist);
 		return new Response(Integer.parseInt(environment.getProperty("success.code")),
@@ -264,5 +282,34 @@ public class UserServiceImp implements IUserServices {
 		userRepository.save(user);
 		return new Response(Integer.parseInt(environment.getProperty("success.code")),
 				environment.getProperty("upload.profilepic"), message.Profile_Uploaded);
+	}
+
+	@Override
+	public Response addNewUserByUser(String token, UserDto userDto) {
+		String user = jwtToken.getToken(token);
+		UserEntity userEntity = userRepository.findByUserName(user);
+		if (userEntity == null)
+			throw new UserNotExist(message.User_Not_Exist);
+		if (userEntity.isValidate()) {
+			if (userEntity.getPermissionsEntity().isAddInUserInfo()) {
+				UserEntity userName = userRepository.findByUserName(userDto.getUserName());
+				UserEntity userEmail = userRepository.findByEmail(userDto.getEmail());
+				if (userName != null || userEmail != null)
+					throw new UserAlreadyExsist(message.User_Already_Exist);
+				if (!(userDto.getConfirmPassword()).equals(userDto.getUserPassword()))
+					throw new IncorrectPassword(message.Incorrect_Confirm_Password);
+				UserEntity adduserEntity = mapper.map(userDto, UserEntity.class);
+				String userToken = jwtToken.generateToken(userDto.getUserName());
+				System.out.println("USER TOKEN:-      " + userToken);
+				userEntity.setToken(userToken);
+				simpleMailMessage = messageBody.verifyMail(userDto.getEmail(), userDto.getFirstName(), userToken);
+				mailSenderService.sendEmail(simpleMailMessage);
+				userRepository.save(adduserEntity);
+				return new Response(Integer.parseInt(environment.getProperty("success.code")),
+						environment.getProperty("user.added"), userToken);
+			}
+			throw new PermissionDeniedError(message.Permission_Denied);
+		}
+		throw new InvalideUser(message.Email_Not_Verified);
 	}
 }

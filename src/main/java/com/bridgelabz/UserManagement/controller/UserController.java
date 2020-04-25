@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.bridgelabz.UserManagement.dto.EditUserDto;
 import com.bridgelabz.UserManagement.dto.ForgetPasswordDto;
 import com.bridgelabz.UserManagement.dto.LoginDto;
 import com.bridgelabz.UserManagement.dto.ResetPasswordDto;
@@ -33,42 +34,42 @@ public class UserController {
 	@Autowired
 	IUserServices userService;
 
-	// create new user
+	// Create new user while Signing-Up Rest Api
 	@PostMapping("/addNewUser")
 	public ResponseEntity<Response> createNewUser(@Valid @RequestBody UserDto userDto) {
 		Response response = userService.newUser(userDto);
 		return new ResponseEntity<Response>(response, HttpStatus.OK);
 	}
 
-	// get user list
+	// Get user list for user role Rest Api
 	@GetMapping("/userList")
 	public ResponseEntity<Response> userList() {
 		Response response = userService.getUserList();
 		return new ResponseEntity<Response>(response, HttpStatus.OK);
 	}
 
-	// set user profile pic
+	// Set user profile pic Rest Api
 	@PostMapping("/setProfilePic")
 	public ResponseEntity<Response> setProfilePic(@RequestHeader String token, MultipartFile file) {
 		Response response = userService.addProfilePic(token, file);
 		return new ResponseEntity<Response>(response, HttpStatus.OK);
 	}
 
-	// login
+	// Login Rest Api
 	@PostMapping("/login")
 	public ResponseEntity<Response> login(@Valid @RequestBody LoginDto loginDto) {
 		Response response = userService.login(loginDto);
 		return new ResponseEntity<Response>(response, HttpStatus.OK);
 	}
 
-	// logout
+	// Logout Rest Api
 	@PostMapping("/logout")
 	public ResponseEntity<Response> logout(@RequestHeader String token) {
 		Response response = userService.logout(token);
 		return new ResponseEntity<Response>(response, HttpStatus.OK);
 	}
 
-	// validate user
+	// Validate User Rest Api
 	@GetMapping("/valiateUser/{token}")
 	public ResponseEntity<Response> validateUser(@PathVariable String token) {
 		Response response = userService.validateUser(token);
@@ -90,17 +91,32 @@ public class UserController {
 		return new ResponseEntity<Response>(response, HttpStatus.OK);
 	}
 
-	// Get User Details Rest Api
+	// Get User Profile Detail Rest Api
 	@GetMapping("/getUserDetail")
-	public ResponseEntity<Response> getUserProfileDetail(@RequestHeader String token){
+	public ResponseEntity<Response> getUserProfileDetail(@RequestHeader String token) {
 		Response response = userService.getUserProfileDetail(token);
 		return new ResponseEntity<Response>(response, HttpStatus.OK);
 	}
-	
+
 	// Add Permission to user Rest Api
 	@PostMapping("/addPermissions")
-	public ResponseEntity<Response> addPermissions(@RequestHeader String token){
+	public ResponseEntity<Response> addPermissions(@RequestHeader String token) {
 		Response response = userService.addPermissions(token);
+		return new ResponseEntity<Response>(response, HttpStatus.OK);
+	}
+
+	// Add Permission to user Rest Api
+	@PutMapping("/editUserProfile")
+	public ResponseEntity<Response> editUserProfile(@RequestHeader String token,
+			@Valid @RequestBody EditUserDto editUserDto) {
+		Response response = userService.editUserProfile(token, editUserDto);
+		return new ResponseEntity<Response>(response, HttpStatus.OK);
+	}
+
+	// Add new User from register User Account Rest Api
+	@PostMapping("/addNewUserByUser")
+	public ResponseEntity<Response> addNewUserByUser(@RequestHeader String token, @Valid @RequestBody UserDto userDto) {
+		Response response = userService.addNewUserByUser(token, userDto);
 		return new ResponseEntity<Response>(response, HttpStatus.OK);
 	}
 }

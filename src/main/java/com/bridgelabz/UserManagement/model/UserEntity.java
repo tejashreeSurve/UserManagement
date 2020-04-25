@@ -38,7 +38,7 @@ public class UserEntity {
 	private boolean logoutStatus = false;
 	private String userStatus = "Inactive";
 	@OneToOne(mappedBy = "userEntity")
-	private PermissionsEntity permissionsEntity = new PermissionsEntity();
+	private PermissionsEntity permissionsEntity;
 
 	public int getId() {
 		return id;

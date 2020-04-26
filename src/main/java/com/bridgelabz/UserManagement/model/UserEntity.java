@@ -1,6 +1,7 @@
 package com.bridgelabz.UserManagement.model;
 
 import java.time.LocalDate;
+import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -36,6 +37,7 @@ public class UserEntity {
 	private String latestLoginTime;
 	private String token;
 	private boolean logoutStatus = false;
+	private Date registerTime;
 	private String userStatus = "Inactive";
 	@OneToOne(mappedBy = "userEntity")
 	private PermissionsEntity permissionsEntity;
@@ -206,5 +208,13 @@ public class UserEntity {
 
 	public void setPermissionsEntity(PermissionsEntity permissionsEntity) {
 		this.permissionsEntity = permissionsEntity;
+	}
+
+	public Date getRegisterTime() {
+		return registerTime;
+	}
+
+	public void setRegisterTime(Date registerTime) {
+		this.registerTime = registerTime;
 	}
 }

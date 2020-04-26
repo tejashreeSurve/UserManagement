@@ -14,7 +14,7 @@ public interface IUserServices {
 
 	Response newUser(UserDto userDto);
 
-	Response getUserList();
+	Response getUserList(String token);
 
 	Response validateUser(String token);
 

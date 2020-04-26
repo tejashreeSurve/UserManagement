@@ -43,8 +43,8 @@ public class UserController {
 
 	// Get user list for user role Rest Api
 	@GetMapping("/userList")
-	public ResponseEntity<Response> userList() {
-		Response response = userService.getUserList();
+	public ResponseEntity<Response> userList(@RequestHeader String token) {
+		Response response = userService.getUserList(token);
 		return new ResponseEntity<Response>(response, HttpStatus.OK);
 	}
 

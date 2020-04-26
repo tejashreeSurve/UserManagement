@@ -156,6 +156,7 @@ public class UserServiceImp implements IUserServices {
 		String token = jwtToken.generateToken(userDto.getUserName());
 		System.out.println("USER TOKEN:-      " + token);
 		userEntity.setToken(token);
+		userEntity.setRegisterTime(new Date());
 		simpleMailMessage = messageBody.verifyMail(userDto.getEmail(), userDto.getFirstName(), token);
 		mailSenderService.sendEmail(simpleMailMessage);
 		userRepository.save(userEntity);
@@ -236,7 +237,11 @@ public class UserServiceImp implements IUserServices {
 	}
 
 	@Override
-	public Response getUserList() {
+	public Response getUserList(String token) {
+		String userName = jwtToken.getToken(token);
+		UserEntity user = userRepository.findByUserName(userName);
+		if (user == null)
+			throw new UserNotExist(message.User_Not_Exist);
 		List<Object[]> userList = userRepository.userList();
 		if (userList == null)
 			throw new UserNotExist(message.Users_List_Not_Exist);
@@ -302,6 +307,7 @@ public class UserServiceImp implements IUserServices {
 				String userToken = jwtToken.generateToken(userDto.getUserName());
 				System.out.println("USER TOKEN:-      " + userToken);
 				userEntity.setToken(userToken);
+				userEntity.setRegisterTime(new Date());
 				simpleMailMessage = messageBody.verifyMail(userDto.getEmail(), userDto.getFirstName(), userToken);
 				mailSenderService.sendEmail(simpleMailMessage);
 				userRepository.save(adduserEntity);

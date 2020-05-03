@@ -10,6 +10,10 @@ import javax.persistence.Table;
 
 import org.springframework.stereotype.Component;
 
+/**
+ * @author Tejashree Surve
+ * @Purpose : This is Entity Class for Permission Details Entity.
+ */
 @Component
 @Entity
 @Table(name = "permissionDetails")

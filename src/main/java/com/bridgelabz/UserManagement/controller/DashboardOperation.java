@@ -49,4 +49,74 @@ public class DashboardOperation {
 		Response response = dashboardService.getTotalOnlineUser(token);
 		return new ResponseEntity<Response>(response, HttpStatus.OK);
 	}
+
+	// Get Latest Four Register User List Rest Api
+	@GetMapping("/getLatestFourRegisterUser")
+	public ResponseEntity<Response> getLatestFourRegisterUser(@RequestHeader String token) {
+		Response response = dashboardService.getLatestFourRegisterUser(token);
+		return new ResponseEntity<Response>(response, HttpStatus.OK);
+	}
+
+	// Get Latest Register User List Rest Api
+	@GetMapping("/getLatestRegisterList")
+	public ResponseEntity<Response> getLatestRegisterList(@RequestHeader String token) {
+		Response response = dashboardService.getLatestRegisterList(token);
+		return new ResponseEntity<Response>(response, HttpStatus.OK);
+	}
+
+	// Get All Time Top Location Registration List Rest Api
+	@GetMapping("/getAllTimeTopLocationList")
+	public ResponseEntity<Response> getAllTimeTopLocationList(@RequestHeader String token) {
+		Response response = dashboardService.getAllTimeTopLocationList(token);
+		return new ResponseEntity<Response>(response, HttpStatus.OK);
+	}
+
+	// Get All Time Top Three Location Registration Rest Api
+	@GetMapping("/getAllTimeTopThreeLocationList")
+	public ResponseEntity<Response> getAllTimeTopThreeLocationList(@RequestHeader String token) {
+		Response response = dashboardService.getAllTimeTopThreeLocationList(token);
+		return new ResponseEntity<Response>(response, HttpStatus.OK);
+	}
+
+	// Get Two Twenty Location Registration List Rest Api
+	@GetMapping("/getTwoTwentyLocationList")
+	public ResponseEntity<Response> getTwoTwentyLocationList(@RequestHeader String token) {
+		Response response = dashboardService.getTwoTwentyLocationList(token);
+		return new ResponseEntity<Response>(response, HttpStatus.OK);
+	}
+
+	// Get Two Twenty Three Location Registration Rest Api
+	@GetMapping("/getTwoTwentyThreeLocation")
+	public ResponseEntity<Response> getTwoTwentyThreeLocation(@RequestHeader String token) {
+		Response response = dashboardService.getTwoTwentyThreeLocation(token);
+		return new ResponseEntity<Response>(response, HttpStatus.OK);
+	}
+
+	// Get All Time Gender percentage Rest Api
+	@GetMapping("/getAllTimeGender")
+	public ResponseEntity<Response> getAllTimeGender(@RequestHeader String token) {
+		Response response = dashboardService.getAllTimeGender(token);
+		return new ResponseEntity<Response>(response, HttpStatus.OK);
+	}
+
+	// Get Two Twenty Gender percentage Rest Api
+	@GetMapping("/getTwoTwentyGender")
+	public ResponseEntity<Response> getTwoTwentyGender(@RequestHeader String token) {
+		Response response = dashboardService.getTwoTwentyGender(token);
+		return new ResponseEntity<Response>(response, HttpStatus.OK);
+	}
+
+	// Get April Gender percentage Rest Api
+	@GetMapping("/getAprilGender")
+	public ResponseEntity<Response> getAprilGender(@RequestHeader String token) {
+		Response response = dashboardService.getAprilGender(token);
+		return new ResponseEntity<Response>(response, HttpStatus.OK);
+	}
+
+	// Get All Time Age Group User Rest Api
+	@GetMapping("/getAllTimeAgeGroup")
+	public ResponseEntity<Response> getAllTimeAgeGroup(@RequestHeader String token) {
+		Response response = dashboardService.getAllTimeAgeGroup(token);
+		return new ResponseEntity<Response>(response, HttpStatus.OK);
+	}
 }

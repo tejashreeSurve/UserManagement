@@ -1,7 +1,10 @@
 package com.bridgelabz.UserManagement.dto;
 
 import javax.validation.constraints.NotEmpty;
-
+/**
+ * @author Tejashree Surve
+ * @Purpose : This is Data Transfer Object class for Reset password Api's.
+ */
 public class ResetPasswordDto {
 	@NotEmpty
 	private String userPassword;

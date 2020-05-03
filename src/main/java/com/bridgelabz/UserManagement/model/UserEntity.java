@@ -12,6 +12,10 @@ import javax.persistence.Table;
 
 import org.springframework.stereotype.Component;
 
+/**
+ * @author Tejashree Surve
+ * @Purpose : This is Entity Class for User Details Entity.
+ */
 @Component
 @Entity
 @Table(name = "userDetails")

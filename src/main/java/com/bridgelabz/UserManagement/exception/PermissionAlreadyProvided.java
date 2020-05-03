@@ -1,6 +1,10 @@
 package com.bridgelabz.UserManagement.exception;
 
-public class PermissionAlreadyProvided extends RuntimeException{
+/**
+ * @author Tejashree Surve
+ * @Purpose : This is customize Exception.
+ */
+public class PermissionAlreadyProvided extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 

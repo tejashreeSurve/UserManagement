@@ -1,5 +1,9 @@
 package com.bridgelabz.UserManagement.response;
 
+/**
+ * @author Tejashree Surve
+ * @Purpose : This Class provide the data to send in http response.
+ */
 public class Response {
 
 	private int statuscode;

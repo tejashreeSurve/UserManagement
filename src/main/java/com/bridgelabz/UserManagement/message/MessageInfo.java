@@ -31,6 +31,8 @@ public class MessageInfo {
 
 	public String User_Role_Added = "New User Role is Successfully Added";
 	
+	public String User_Deleted = "User is Successfully Deleted by Admin User";
+	
 	/********************* message for login/logout **********************/
 
 	public String Incorrect_Confirm_Password = "Please Enter valide Confirm Password";

@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.bridgelabz.UserManagement.Utility.EditedDateFormat;
 import com.bridgelabz.UserManagement.Utility.JwtToken;
 import com.bridgelabz.UserManagement.Utility.MailSenderService;
 import com.bridgelabz.UserManagement.dto.EditUserDto;
@@ -46,6 +45,10 @@ import com.bridgelabz.UserManagement.response.Response;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 
+/**
+ * @author Tejashree Surve
+ * @Purpose : This is Service Method for UserServiceImp.
+ */
 @Component
 @Service
 @PropertySource("message.properties")
@@ -72,24 +75,29 @@ public class UserServiceImp implements IUserServices {
 	@Autowired
 	private MessageBody messageBody;
 
+	@Autowired
+	private EditedDateFormat date;
+
 	SimpleMailMessage simpleMailMessage;
 
 	@Autowired
 	MailSenderService mailSenderService;
 
+	// login user
 	@Override
 	public Response login(LoginDto loginDto) {
 		UserEntity user = userRepository.findByUserName(loginDto.getUserName());
+		// check if user is present or not
 		if (user == null)
 			throw new InvlideLogin(message.Login_Exception);
 		String token = jwtToken.generateToken(user.getUserName());
 		System.out.println("USEREMAIL :--     " + token);
 		user.setToken(token);
+		// check if user is validate or not
 		if (user.isValidate()) {
+			// check if user password is correct or not
 			if ((user.getUserPassword()).equals(loginDto.getUserPassword())) {
-				DateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy hh:mm aa");
-				String dateString = dateFormat.format(new Date()).toString();
-				user.setLatestLoginTime(dateString);
+				user.setLatestLoginTime(date.editedDateFormat());
 				user.setUserStatus("Active");
 				userRepository.save(user);
 				return new Response(Integer.parseInt(environment.getProperty("success.code")),
@@ -100,6 +108,7 @@ public class UserServiceImp implements IUserServices {
 		throw new InvalideUser(message.Email_Not_Verified);
 	}
 
+	// logout user
 	@Override
 	public Response logout(String token) {
 		String userName = jwtToken.getToken(token);
@@ -112,15 +121,18 @@ public class UserServiceImp implements IUserServices {
 				environment.getProperty("login.out"), message.Login_Out);
 	}
 
+	// forget password
 	@Override
 	public Response forgetPassword(ForgetPasswordDto forgetPasswordDto) {
 		UserEntity user = userRepository.findByEmail(forgetPasswordDto.getEmail());
 		if (user == null)
 			throw new UserNotExist(message.User_Not_Exist);
+		// check if user is validate or not
 		if (user.isValidate()) {
 			String token = jwtToken.generateToken(user.getUserName());
 			System.out.println("FROGETPASSWORD TOKEN :----          " + token);
 			simpleMailMessage = messageBody.passwordReset(user.getEmail(), user.getFirstName(), token);
+			// send token
 			mailSenderService.sendEmail(simpleMailMessage);
 			return new Response(Integer.parseInt(environment.getProperty("success.code")),
 					environment.getProperty("token.send"), message.Token_For_ForgetPassword);
@@ -128,6 +140,7 @@ public class UserServiceImp implements IUserServices {
 		throw new InvalideUser(message.Email_Not_Verified);
 	}
 
+	// reset password
 	@Override
 	public Response resetPassword(String token, ResetPasswordDto resetPasswordDto) {
 		String userName = jwtToken.getToken(token);
@@ -144,6 +157,7 @@ public class UserServiceImp implements IUserServices {
 		throw new IncorrectPassword(message.Incorrect_Password);
 	}
 
+	// add new user
 	@Override
 	public Response newUser(UserDto userDto) {
 		UserEntity userName = userRepository.findByUserName(userDto.getUserName());
@@ -164,6 +178,7 @@ public class UserServiceImp implements IUserServices {
 				environment.getProperty("user.added"), token);
 	}
 
+	// provide permission for newly create user as per normal user or admin user
 	@Override
 	public Response addPermissions(String token) {
 		String user = jwtToken.getToken(token);
@@ -196,6 +211,7 @@ public class UserServiceImp implements IUserServices {
 		}
 	}
 
+	// get user profile details
 	@Override
 	public Response getUserProfileDetail(String token) {
 		String userName = jwtToken.getToken(token);
@@ -206,6 +222,7 @@ public class UserServiceImp implements IUserServices {
 				environment.getProperty("profile.displayed"), userRepository.userDetails(userName));
 	}
 
+	// edit user profile
 	@Override
 	public Response editUserProfile(String token, EditUserDto editUserDto) {
 		String userName = jwtToken.getToken(token);
@@ -224,6 +241,7 @@ public class UserServiceImp implements IUserServices {
 				environment.getProperty("update.profileDetail"), message.Updated_Profile);
 	}
 
+	// validate user through token
 	@Override
 	public Response validateUser(String token) {
 		String userName = jwtToken.getToken(token);
@@ -236,6 +254,7 @@ public class UserServiceImp implements IUserServices {
 				environment.getProperty("verified.email"), message.Verified_User);
 	}
 
+	// get user list
 	@Override
 	public Response getUserList(String token) {
 		String userName = jwtToken.getToken(token);
@@ -249,6 +268,7 @@ public class UserServiceImp implements IUserServices {
 				environment.getProperty("user.list"), userList);
 	}
 
+	// add user profile pic
 	@Override
 	public Response addProfilePic(String token, MultipartFile profileImage) {
 		String userName = jwtToken.getToken(token);
@@ -289,6 +309,7 @@ public class UserServiceImp implements IUserServices {
 				environment.getProperty("upload.profilepic"), message.Profile_Uploaded);
 	}
 
+	// add new user by admin user
 	@Override
 	public Response addNewUserByUser(String token, UserDto userDto) {
 		String user = jwtToken.getToken(token);

@@ -7,7 +7,10 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-
+/**
+ * @author Tejashree Surve
+ * @Purpose : This is Data Transfer Object class for edit User Api's.
+ */
 public class EditUserDto {
 	@NotEmpty
 	private String firstName;

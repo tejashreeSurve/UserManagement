@@ -2,9 +2,11 @@ package com.bridgelabz.UserManagement.services;
 
 import com.bridgelabz.UserManagement.dto.UserDto;
 import com.bridgelabz.UserManagement.response.Response;
+
 /**
  * @author Tejashree Surve
- * @Purpose : This is IDashboardServices Interface which contains every method of services class.
+ * @Purpose : This is IDashboardServices Interface which contains every method
+ *          of services class.
  */
 public interface IDashboardServices {
 
@@ -41,20 +43,26 @@ public interface IDashboardServices {
 	// get 2020 april location list
 	Response getAprilLocationList(String token);
 
-	// get 2020 april top three location 
+	// get 2020 april top three location
 	Response getAprilThreeLocation(String token);
 
-	// get all time gender 
+	// get all time gender
 	Response getAllTimeGender(String token);
 
-	// get 2020 gender 
+	// get 2020 gender
 	Response getTwoTwentyGender(String token);
 
-	// get 2020 april gender 
+	// get 2020 april gender
 	Response getAprilGender(String token);
 
 	// get all time age group number of user
 	Response getAllTimeAgeGroup(String token);
+
+	// get 2020 age group number of user
+	Response getTwentyTwentyAgeGroup(String token);
+
+	// get 2020 April age group number of user
+	Response getAprilAgeGroup(String token);
 
 	// edit user by admin user
 	Response editUserByAdmin(String token, int id, UserDto userDto);

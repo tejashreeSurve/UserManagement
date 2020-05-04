@@ -188,7 +188,7 @@ public class DashboardServiceImp implements IDashboardServices {
 			throw new UserNotExist(message.User_Not_Exist);
 		if (user.getUserRole().equals("admin")) {
 			return new Response(Integer.parseInt(environment.getProperty("success.code")), "2020 Top Location List",
-					userRepository.twoTwentyLocationList());
+					userRepository.twentyTwentyLocationList());
 		}
 		throw new PermissionDeniedError(message.Permission_Denied);
 	}
@@ -200,7 +200,7 @@ public class DashboardServiceImp implements IDashboardServices {
 		if (user == null)
 			throw new UserNotExist(message.User_Not_Exist);
 		if (user.getUserRole().equals("admin")) {
-			List<Object[]> list = userRepository.twoTwentyLocationList();
+			List<Object[]> list = userRepository.twentyTwentyLocationList();
 			Object[] topThreeList = new Object[3];
 			for (int i = 0; i < 3; i++) {
 				topThreeList[i] = list.get(i);
@@ -267,7 +267,7 @@ public class DashboardServiceImp implements IDashboardServices {
 			throw new UserNotExist(message.User_Not_Exist);
 		if (user.getUserRole().equals("admin")) {
 			return new Response(Integer.parseInt(environment.getProperty("success.code")), "April Three Top Location",
-					userRepository.twoTwentyGender());
+					userRepository.twentyTwentyGender());
 		}
 		throw new PermissionDeniedError(message.Permission_Denied);
 	}
@@ -330,6 +330,34 @@ public class DashboardServiceImp implements IDashboardServices {
 		if (user.getUserRole().equals("admin")) {
 			return new Response(Integer.parseInt(environment.getProperty("success.code")), "Age Group",
 					userRepository.allTimeAgeGroup());
+		}
+		throw new PermissionDeniedError(message.Permission_Denied);
+	}
+	
+	// to get 2020 number of user in specific age group
+	@Override
+	public Response getTwentyTwentyAgeGroup(String token) {
+		String userName = jwtToken.getToken(token);
+		UserEntity user = userRepository.findByUserName(userName);
+		if (user == null)
+			throw new UserNotExist(message.User_Not_Exist);
+		if (user.getUserRole().equals("admin")) {
+			return new Response(Integer.parseInt(environment.getProperty("success.code")), "Age Group",
+					userRepository.twentyTwentyAgeGroup());
+		}
+		throw new PermissionDeniedError(message.Permission_Denied);
+	}
+	
+	// to get 2020 April number of user in specific age group
+	@Override
+	public Response getAprilAgeGroup(String token) {
+		String userName = jwtToken.getToken(token);
+		UserEntity user = userRepository.findByUserName(userName);
+		if (user == null)
+			throw new UserNotExist(message.User_Not_Exist);
+		if (user.getUserRole().equals("admin")) {
+			return new Response(Integer.parseInt(environment.getProperty("success.code")), "Age Group",
+					userRepository.aprilAgeGroup());
 		}
 		throw new PermissionDeniedError(message.Permission_Denied);
 	}

@@ -49,8 +49,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Integer> {
 	List<Object[]> topLocationAsc();
 	
 	// call create procedure from DataBase for User Register in 2020 year
-	@Query(value = "call twoTwentyLocationList()", nativeQuery = true)
-	List<Object[]> twoTwentyLocationList();
+	@Query(value = "call twentyTwentyLocationList()", nativeQuery = true)
+	List<Object[]> twentyTwentyLocationList();
 	
 	// call create procedure from DataBase for User Register in 2020 April as per User Location
 	@Query(value = "call aprilLocationList()", nativeQuery = true)
@@ -65,12 +65,20 @@ public interface UserRepository extends JpaRepository<UserEntity, Integer> {
 	List<Object[]> aprilGender();
 	
 	// call create procedure from DataBase for User Register in 2020 getting Gender percentage
-	@Query(value = "call TwoTwentyGender()", nativeQuery = true)
-	List<Object[]> twoTwentyGender();
+	@Query(value = "call twentyTwentyGender()", nativeQuery = true)
+	List<Object[]> twentyTwentyGender();
 	
-	// call create procedure from DataBase for Age Group 
+	// call create procedure from DataBase for All time Age Group 
 	@Query(value = "call AllTimeAgeGroup()", nativeQuery = true)
 	List<Object[]> allTimeAgeGroup();
+	
+	// call create procedure from DataBase for 2020 Age Group 
+	@Query(value = "call twentyTwentyAgeGroup()", nativeQuery = true)
+	List<Object[]> twentyTwentyAgeGroup();
+	
+	// call create procedure from DataBase for 2020 April Age Group 
+	@Query(value = "call aprilAgeGroup()", nativeQuery = true)
+	List<Object[]> aprilAgeGroup();
 	
 	// find user by email
 	UserEntity findByEmail(String email);

@@ -119,4 +119,18 @@ public class DashboardOperation {
 		Response response = dashboardService.getAllTimeAgeGroup(token);
 		return new ResponseEntity<Response>(response, HttpStatus.OK);
 	}
+
+	// Get 2020 Age Group User Rest Api
+	@GetMapping("/getTwentyTwentyAgeGroup")
+	public ResponseEntity<Response> getTwentyTwentyAgeGroup(@RequestHeader String token) {
+		Response response = dashboardService.getTwentyTwentyAgeGroup(token);
+		return new ResponseEntity<Response>(response, HttpStatus.OK);
+	}
+
+	// Get 2020 April Age Group User Rest Api
+	@GetMapping("/getAprilAgeGroup")
+	public ResponseEntity<Response> getAprilAgeGroup(@RequestHeader String token) {
+		Response response = dashboardService.getAprilAgeGroup(token);
+		return new ResponseEntity<Response>(response, HttpStatus.OK);
+	}
 }
